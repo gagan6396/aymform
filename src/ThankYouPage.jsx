@@ -66,10 +66,7 @@ const ThankYouPage = ({ onReset }) => {
               <span className="text-orange-500 font-bold mt-0.5">2.</span>
               <span>You'll receive a confirmation email with course details</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="text-orange-500 font-bold mt-0.5">3.</span>
-              <span>We'll contact you via phone for payment and onboarding</span>
-            </li>
+           
           </ul>
         </div>
 
