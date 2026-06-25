@@ -1,5 +1,7 @@
+// components/EnrollmentForm.jsx
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const COURSES = [
   { label: "100-Hour Yoga Teacher Training",                value: "100hr_ytt",      durations: ["13 Days"] },
@@ -12,11 +14,10 @@ const COURSES = [
   { label: "Yoga Teacher Training Course in Goa",           value: "goa_retreat",    durations: ["200 hour [23 days]", "300 hour [26 days]", "500 hour [57 days]"] },
 ];
 
-// ── Google Form config ────────────────────────────────────────────────────────
-// Course field uses radio in GForm → send the EXACT option label text
 const GF_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSdmwzYhwfmkihIWWwoJ5sBeDJMlCwo6oqyhuLXDs5Cki2rxLQ/formResponse";
 
 export default function EnrollmentForm() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -25,64 +26,46 @@ export default function EnrollmentForm() {
     formState: { errors, isSubmitting },
   } = useForm();
 
-  const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
   const selectedCourse = watch("course");
   const courseObj = COURSES.find((c) => c.value === selectedCourse);
 
-  // Auto-select duration when there's only one option
   useEffect(() => {
     if (courseObj?.durations.length === 1) {
       setValue("duration", courseObj.durations[0]);
     } else {
       setValue("duration", "");
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, setValue]);
 
   const onSubmit = async (data) => {
     setSubmitError("");
 
-    // Must send EXACT label text that matches Google Form radio options
     const courseLabel = COURSES.find((c) => c.value === data.course)?.label ?? data.course;
 
     const body = new URLSearchParams();
     body.append("entry.1002069012", data.name);
     body.append("entry.844032593",  data.email);
     body.append("entry.11736650",   data.mobile);
-    body.append("entry.1296177190", courseLabel);   // exact label → matches GForm radio option
+    body.append("entry.1296177190", courseLabel);
     body.append("entry.1857002501", data.state);
     body.append("entry.56371616",   data.country);
-    // Combine address + duration into address field since GForm has no duration field
     body.append("entry.1802059289", `${data.address}\nDuration: ${data.duration}`);
     body.append("entry.1023058625", data.duration);
 
     try {
-      // no-cors: request goes through but response is opaque — treat no throw as success
       await fetch(GF_ACTION, {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
       });
-      setSubmitted(true);
+      // Redirect to thank you page
+      navigate('/thank-you');
     } catch {
       setSubmitError("Something went wrong. Please try again.");
     }
-  };
-
-  const resetForm = () => {
-    setSubmitted(false);
-    setSubmitError("");
-    // Reset all form fields
-    setValue("name", "");
-    setValue("email", "");
-    setValue("mobile", "");
-    setValue("course", "");
-    setValue("duration", "");
-    setValue("state", "");
-    setValue("country", "");
-    setValue("address", "");
   };
 
   const field = (hasErr) =>
@@ -106,25 +89,6 @@ export default function EnrollmentForm() {
       </div>
     </div>
   );
-
-  if (submitted) {
-    return (
-      <BgWrapper>
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-10 max-w-sm w-full text-center">
-          <div className="text-5xl mb-4">🙏</div>
-          <h2 className="text-xl font-bold text-orange-600 mb-2">Thank you!</h2>
-          <p className="text-gray-500 text-sm leading-relaxed">Your enrollment request has been received. We'll contact you within 24 hours.</p>
-          <p className="text-xs text-orange-400 mt-4 font-medium">AYM Yoga School · Rishikesh</p>
-          <button
-            onClick={resetForm}
-            className="mt-6 text-sm text-orange-500 hover:text-orange-600 font-medium underline underline-offset-2 transition-colors"
-          >
-            Make Another Submission →
-          </button>
-        </div>
-      </BgWrapper>
-    );
-  }
 
   return (
     <BgWrapper>
