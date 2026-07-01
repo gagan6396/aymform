@@ -79,10 +79,11 @@ const ThankYouPage = ({ onReset }) => {
           </button> */}
           
           <a
-            href="/"
-            className="block w-full py-3 border border-gray-300 hover:border-orange-400 hover:bg-orange-50 text-gray-700 font-medium rounded-xl text-sm transition-colors"
+            href="https://aymyogaschool.com"
+            target='_blank'
+            className="block w-full py-3 border bg-orange-200 border-gray-300 hover:border-orange-400 hover:bg-orange-50 text-black font-medium rounded-xl text-sm transition-colors"
           >
-            Back to Homepage
+            Visit Our Website
           </a>
         </div>
 
